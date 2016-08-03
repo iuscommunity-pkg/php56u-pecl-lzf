@@ -1,13 +1,5 @@
-%global php_apiver	%((echo 0; php -i 2>/dev/null | sed -n 's/^PHP API => //p') | tail -1)
-%{!?__pecl:		%{expand: %%global __pecl     %{_bindir}/pecl}}
-%{!?php_extdir:		%{expand: %%global php_extdir %(php-config --extension-dir)}}
-
 %define pecl_name LZF
-%if "%{php_version}" < "5.6"
-%global ini_name  lzf.ini
-%else
 %global ini_name  40-lzf.ini
-%endif
 
 Name:		php-pecl-lzf
 Version:	1.6.5
@@ -18,29 +10,19 @@ License:	PHP
 URL:		http://pecl.php.net/package/%{pecl_name}
 Source0:	http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
 
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-
 BuildRequires:	php-devel
 BuildRequires:	php-pear >= 1:1.4.0
 BuildRequires:	liblzf-devel
-%if 0%{?php_zend_api:1}
 Requires:	php(zend-abi) = %{php_zend_api}
 Requires:	php(api) = %{php_core_api}
-%else
-# for EL-5
-Requires:	php-api = %{php_apiver}
-%endif
 %if 0%{?fedora} < 24
 Requires(post):	%{__pecl}
 Requires(postun):	%{__pecl}
 %endif
 Provides:	php-pecl(%{pecl_name}) = %{version}
 
-# RPM 4.8
 %{?filter_provides_in: %filter_provides_in %{php_extdir}/.*\.so$}
 %{?filter_setup}
-# RPM 4.9
-%global __provides_exclude_from %{?__provides_exclude_from:%__provides_exclude_from|}%{php_extdir}/.*\\.so$
 
 
 %description
@@ -67,7 +49,6 @@ phpize
 
 %install
 cd %{pecl_name}-%{version}
-%{__rm} -rf %{buildroot}
 %{__make} install INSTALL_ROOT=%{buildroot} INSTALL="install -p"
 
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/php.d
@@ -92,9 +73,6 @@ NO_INTERACTION=1 \
     -d extension=lzf.so \
 
 
-%clean
-%{__rm} -rf %{buildroot}
-
 %if 0%{?fedora} < 24
 %if 0%{?pecl_install:1}
 %post
@@ -111,7 +89,6 @@ fi
 %endif
 
 %files
-%defattr(-,root,root,-)
 %doc %{pecl_name}-%{version}/CREDITS
 %config(noreplace) %{_sysconfdir}/php.d/%{ini_name}
 %{php_extdir}/lzf.so
