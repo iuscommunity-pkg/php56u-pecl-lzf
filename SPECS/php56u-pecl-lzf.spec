@@ -1,25 +1,25 @@
 %define pecl_name LZF
 %global ini_name  40-lzf.ini
 
-Name:		php-pecl-lzf
-Version:	1.6.5
-Release:	1%{?dist}
-Summary:	Extension to handle LZF de/compression
-Group:		Development/Languages
-License:	PHP
-URL:		http://pecl.php.net/package/%{pecl_name}
-Source0:	http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
+Name: php-pecl-lzf
+Version: 1.6.5
+Release: 1%{?dist}
+Summary: Extension to handle LZF de/compression
+Group: Development/Languages
+License: PHP
+URL: http://pecl.php.net/package/%{pecl_name}
+Source0: http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
 
-BuildRequires:	php-devel
-BuildRequires:	php-pear >= 1:1.4.0
-BuildRequires:	liblzf-devel
-Requires:	php(zend-abi) = %{php_zend_api}
-Requires:	php(api) = %{php_core_api}
+BuildRequires: php-devel
+BuildRequires: php-pear >= 1:1.4.0
+BuildRequires: liblzf-devel
+Requires: php(zend-abi) = %{php_zend_api}
+Requires: php(api) = %{php_core_api}
 %if 0%{?fedora} < 24
-Requires(post):	%{__pecl}
-Requires(postun):	%{__pecl}
+Requires(post): %{__pecl}
+Requires(postun): %{__pecl}
 %endif
-Provides:	php-pecl(%{pecl_name}) = %{version}
+Provides: php-pecl(%{pecl_name}) = %{version}
 
 %{?filter_provides_in: %filter_provides_in %{php_extdir}/.*\.so$}
 %{?filter_setup}
