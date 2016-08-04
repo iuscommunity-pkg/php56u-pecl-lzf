@@ -3,6 +3,8 @@
 %global php_base php56u
 %global ini_name 40-%{ext_name}.ini
 
+%bcond_without zts
+
 Name: %{php_base}-pecl-%{ext_name}
 Version: 1.6.5
 Release: 1.ius%{?dist}
@@ -40,6 +42,7 @@ Provides: %{php_base}-pecl(%{pecl_name})%{?_isa} = %{version}
 Conflicts: php-pecl-%{ext_name} < %{version}
 
 %{?filter_provides_in: %filter_provides_in %{php_extdir}/.*\.so$}
+%{?filter_provides_in: %filter_provides_in %{php_ztsextdir}/.*\.so$}
 %{?filter_setup}
 
 
@@ -62,6 +65,10 @@ sed -e 's/role="test"/role="src"/' \
     -e '/LICENSE/s/role="doc"/role="src"/' \
     -i package.xml
 
+%if %{with zts}
+cp -pr NTS ZTS
+%endif
+
 %{__cat} > %{ini_name} << 'EOF'
 ; Enable %{pecl_name} extension module
 extension=%{ext_name}.so
@@ -71,14 +78,27 @@ EOF
 %build
 pushd NTS
 phpize
-%configure --enable-lzf --with-liblzf
+%configure --enable-lzf --with-liblzf --with-php-config=%{_bindir}/php-config
 %{__make} %{?_smp_mflags}
 popd
+
+%if %{with zts}
+pushd ZTS
+zts-phpize
+%configure --enable-lzf --with-liblzf --with-php-config=%{_bindir}/zts-php-config
+%{__make} %{?_smp_mflags}
+popd
+%endif
 
 
 %install
 %{__make} -C NTS install INSTALL_ROOT=%{buildroot}
 %{__install} -D -p -m 644 %{ini_name} %{buildroot}%{php_inidir}/%{ini_name}
+
+%if %{with zts}
+%{__make} -C ZTS install INSTALL_ROOT=%{buildroot}
+%{__install} -D -p -m 644 %{ini_name} %{buildroot}%{php_ztsinidir}/%{ini_name}
+%endif
 
 %{__install} -D -p -m 644 package.xml %{buildroot}%{pecl_xmldir}/%{pecl_name}.xml
 
@@ -96,6 +116,17 @@ NO_INTERACTION=1 \
     -n -q \
     -d extension=%{buildroot}%{php_extdir}/%{ext_name}.so
 popd
+
+%if %{with zts}
+pushd ZTS
+TEST_PHP_EXECUTABLE=%{__ztsphp} \
+REPORT_EXIT_STATUS=1 \
+NO_INTERACTION=1 \
+%{__ztsphp} run-tests.php \
+    -n -q \
+    -d extension=%{buildroot}%{php_ztsextdir}/%{ext_name}.so
+popd
+%endif
 
 
 %if 0%{?pecl_install:1}
@@ -121,6 +152,11 @@ fi
 %{php_extdir}/%{ext_name}.so
 %config(noreplace) %{php_inidir}/%{ini_name}
 
+%if %{with zts}
+%{php_ztsextdir}/%{ext_name}.so
+%config(noreplace) %{php_ztsinidir}/%{ini_name}
+%endif
+
 
 %changelog
 * Wed Aug 03 2016 Carl George <carl.george@rackspace.com> - 1.6.5-1.ius
@@ -128,6 +164,7 @@ fi
 - Install package.xml as %%{pecl_name}.xml, not %%{name}.xml
 - Install LICENSE
 - Install doc files in %%{pecl_docdir}
+- Enable ZTS
 
 * Mon Jun 27 2016 Remi Collet <remi@fedoraproject.org> - 1.6.5-1
 - update to 1.6.5
