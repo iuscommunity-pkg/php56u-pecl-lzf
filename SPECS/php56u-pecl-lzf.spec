@@ -105,6 +105,8 @@ fi
 
 
 %files
+%{!?_licensedir:%global license %%doc}
+%license NTS/LICENSE
 %doc NTS/CREDITS
 %{pecl_xmldir}/%{pecl_name}.xml
 
@@ -116,6 +118,7 @@ fi
 * Wed Aug 03 2016 Carl George <carl.george@rackspace.com> - 1.6.5-1.ius
 - Port from Fedora to IUS
 - Install package.xml as %%{pecl_name}.xml, not %%{name}.xml
+- Install LICENSE
 
 * Mon Jun 27 2016 Remi Collet <remi@fedoraproject.org> - 1.6.5-1
 - update to 1.6.5
