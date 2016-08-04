@@ -58,6 +58,10 @@ mv %{pecl_name}-%{version} NTS
 sed -e '/name="lib/d' -i package.xml
 rm -r NTS/lib/
 
+sed -e 's/role="test"/role="src"/' \
+    -e '/LICENSE/s/role="doc"/role="src"/' \
+    -i package.xml
+
 %{__cat} > %{ini_name} << 'EOF'
 ; Enable %{pecl_name} extension module
 extension=%{ext_name}.so
@@ -77,6 +81,10 @@ popd
 %{__install} -D -p -m 644 %{ini_name} %{buildroot}%{php_inidir}/%{ini_name}
 
 %{__install} -D -p -m 644 package.xml %{buildroot}%{pecl_xmldir}/%{pecl_name}.xml
+
+for i in $(grep 'role="doc"' package.xml | sed -e 's/^.*name="//;s/".*$//')
+do install -D -p -m 644 NTS/$i %{buildroot}%{pecl_docdir}/%{pecl_name}/$i
+done
 
 
 %check
@@ -107,7 +115,7 @@ fi
 %files
 %{!?_licensedir:%global license %%doc}
 %license NTS/LICENSE
-%doc NTS/CREDITS
+%doc %{pecl_docdir}/%{pecl_name}
 %{pecl_xmldir}/%{pecl_name}.xml
 
 %{php_extdir}/%{ext_name}.so
@@ -119,6 +127,7 @@ fi
 - Port from Fedora to IUS
 - Install package.xml as %%{pecl_name}.xml, not %%{name}.xml
 - Install LICENSE
+- Install doc files in %%{pecl_docdir}
 
 * Mon Jun 27 2016 Remi Collet <remi@fedoraproject.org> - 1.6.5-1
 - update to 1.6.5
