@@ -58,9 +58,6 @@ mv %{pecl_name}-%{version} NTS
 sed -e '/name="lib/d' -i package.xml
 rm -r NTS/lib/
 
-[ -f package2.xml ] || %{__mv} package.xml package2.xml
-%{__mv} package2.xml %{pecl_name}-%{version}/%{pecl_name}.xml
-
 %{__cat} > %{ini_name} << 'EOF'
 ; Enable %{pecl_name} extension module
 extension=%{ext_name}.so
@@ -79,8 +76,7 @@ popd
 %{__make} -C NTS install INSTALL_ROOT=%{buildroot}
 %{__install} -D -p -m 644 %{ini_name} %{buildroot}%{php_inidir}/%{ini_name}
 
-%{__mkdir_p} %{buildroot}%{pecl_xmldir}
-%{__install} -p -m 644 %{pecl_name}.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
+%{__install} -D -p -m 644 package.xml %{buildroot}%{pecl_xmldir}/%{pecl_name}.xml
 
 
 %check
@@ -96,7 +92,7 @@ popd
 
 %if 0%{?pecl_install:1}
 %post
-%{pecl_install} %{pecl_xmldir}/%{name}.xml >/dev/null || :
+%{pecl_install} %{pecl_xmldir}/%{pecl_name}.xml >/dev/null || :
 %endif
 
 
@@ -110,7 +106,7 @@ fi
 
 %files
 %doc NTS/CREDITS
-%{pecl_xmldir}/%{name}.xml
+%{pecl_xmldir}/%{pecl_name}.xml
 
 %{php_extdir}/%{ext_name}.so
 %config(noreplace) %{php_inidir}/%{ini_name}
@@ -119,6 +115,7 @@ fi
 %changelog
 * Wed Aug 03 2016 Carl George <carl.george@rackspace.com> - 1.6.5-1.ius
 - Port from Fedora to IUS
+- Install package.xml as %%{pecl_name}.xml, not %%{name}.xml
 
 * Mon Jun 27 2016 Remi Collet <remi@fedoraproject.org> - 1.6.5-1
 - update to 1.6.5
