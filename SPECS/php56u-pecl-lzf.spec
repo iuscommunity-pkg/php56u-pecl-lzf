@@ -6,7 +6,7 @@
 %bcond_without zts
 
 Name: %{php_base}-pecl-%{ext_name}
-Version: 1.6.5
+Version: 1.6.6
 Release: 1.ius%{?dist}
 Summary: Extension to handle LZF de/compression
 Group: Development/Languages
@@ -159,6 +159,9 @@ fi
 
 
 %changelog
+* Tue May 30 2017 Ben Harper <ben.harper@rackspace.com> - 1.6.6-1.ius
+- Latest upstream
+
 * Wed Aug 03 2016 Carl George <carl.george@rackspace.com> - 1.6.5-1.ius
 - Port from Fedora to IUS
 - Install package.xml as %%{pecl_name}.xml, not %%{name}.xml
